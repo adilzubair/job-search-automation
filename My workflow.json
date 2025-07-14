@@ -1,0 +1,393 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        600
+      ],
+      "id": "2f2507d0-bfe0-4883-b36e-fe1239d917e4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/zkWE1s2S2atq3PFX.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -980,
+        600
+      ],
+      "id": "1b6b98e9-da5d-449f-9d35-4279d90b188f",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('RSS Read').item.json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -540,
+        600
+      ],
+      "id": "24783c17-9b26-46f9-9352-a7f7531ecb2e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're an intelligent bot capable of pulling out data from a job listing site.",
+              "role": "system"
+            },
+            {
+              "content": "=Here's the job site:\n {{ $json.data }}"
+            },
+            {
+              "content": "Please output the data in JSON format, using the following structure:\n\n{\n\"company_name\": \"\",\n\"benefits\": \"\", //401K plan, medical, etc, please separate by commas\n\"job_description\": \"\", //please make it 200 characters or less\n\"location\": \"\"\n}",
+              "role": "assistant"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -320,
+        600
+      ],
+      "id": "809f4aba-b34b-478c-9751-0578db5fe640",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "d356CLk8P17AVpZM",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're an intelligent bot rating how closely a job listing is to a candidates skill set, on a score of 5.\nGive the following points:\na) 3 points for skills matching, 1 point for mostly matching\nb) 1 point for it being the right experience level\nc) 1 point for it being a remote position\nd) 1 point if past job experience matches the job role\ne) 1 point if the skills on the resume align with the job\nf) 3 points if I meet the job qualifications posted based on my resume",
+              "role": "system"
+            },
+            {
+              "content": "=Here's the job listing details:\n{{ $('HTTP Request').item.json.data }}\n\nHere is the candidates skill set:\n📄 SAMPLE RESUME\n\nAlex Morgan\n📍 Toronto, ON, Canada | 📧 alex.morgan@email.com | 📞 (123) 456-7890 | 🌐 linkedin.com/in/alexmorgan | github.com/alexmseo (optional if portfolio on GitHub)\n\n🎓 Education\nBachelor of Business Administration – Marketing\nUniversity of Toronto, Toronto, ON\nGraduated: April 2025 | GPA: 3.7/4.0\n\nRelevant coursework:\n\nDigital Marketing Strategies\n\nData Analytics in Marketing\n\nConsumer Behaviour\n\nSEO & Content Marketing (elective)\n\n💼 Experience\nSEO Intern\nGrowthRocket Agency, Remote | Jan 2025 – Apr 2025\n\nConducted technical SEO audits for 10+ client websites using tools like Screaming Frog, Ahrefs, and Google Search Console.\n\nImplemented structured data (Schema.org) to improve click-through rates in search results.\n\nOptimized on-page elements such as meta titles, descriptions, H1-H3 tags, internal linking, and image alt text.\n\nCollaborated with the content team to develop keyword-rich blog content and updated outdated pages.\n\nImproved page speed performance using tools like PageSpeed Insights and GTmetrix.\n\nFreelance SEO Consultant\nSelf-Employed | May 2024 – Present\n\nHelped 3 small local businesses optimize their websites for search engines, increasing organic traffic by 30–70% within 3 months.\n\nConducted keyword research and competitive analysis to guide content creation.\n\nSet up Google Analytics 4 and Google Search Console for performance monitoring.\n\n🛠 Skills\nSEO Tools: Google Search Console, GA4, Ahrefs, Screaming Frog, SEMrush, Yoast SEO\nCMS: WordPress, Wix\nTechnical SEO: Site audits, page speed optimization, canonical tags, indexing & crawling\nOn-Page SEO: Meta tags, internal linking, content structure, image optimization\nSoft Skills: Communication, problem-solving, attention to detail, teamwork\n\n📚 Certifications\nGoogle Analytics Certification – Google\n\nSEO Fundamentals – Semrush Academy\n\nTechnical SEO Certification – Moz (or any other you’ve done)"
+            },
+            {
+              "content": "Please return JSON data structured the following way:\n{\n\"score\": \"\"\n}",
+              "role": "assistant"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        60,
+        600
+      ],
+      "id": "3b6cfcfb-7602-4819-8c19-2ee0fa952955",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "d356CLk8P17AVpZM",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1jcWMFmbhqN5rIAVlMHcOv8GLBBgzKFHK_fzEHg-2qX8",
+          "mode": "list",
+          "cachedResultName": "LinkedIn Job Listings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jcWMFmbhqN5rIAVlMHcOv8GLBBgzKFHK_fzEHg-2qX8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jcWMFmbhqN5rIAVlMHcOv8GLBBgzKFHK_fzEHg-2qX8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Description": "={{ $('RSS Read').item.json.contentSnippet }}",
+            "Benefits": "={{ $('OpenAI').item.json.message.content.benefits }}",
+            "Company Name": "={{ $('OpenAI').item.json.message.content.company_name }}",
+            "Title": "={{ $('RSS Read').item.json.title }}",
+            "Link": "={{ $('RSS Read').item.json.link }}",
+            "Date": "={{ $('RSS Read').item.json.pubDate }}",
+            "Cover Letter": "={{ $json.choices[0].message.content.cover_letter }}",
+            "Rating": "={{ $('OpenAI1').item.json.choices[0].message.content.score }}"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description",
+              "displayName": "Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rating",
+              "displayName": "Rating",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Benefits",
+              "displayName": "Benefits",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description",
+              "displayName": "Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        820,
+        600
+      ],
+      "id": "f57ab8af-0ea6-47ea-bbbe-eed2eb4a8069",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "WX6X6MUS37cPRMHj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You're an intelligent bot perfect at creating cover letters for a job. Please take the candidates resume and create a customized cover letter to the job.",
+              "role": "system"
+            },
+            {
+              "content": "=Here's the job listing details:\nTitle: {{ $('RSS Read').item.json.title }}\nDescription: {{ $('OpenAI').item.json.message.content.job_description }}\nName: {{ $('OpenAI').item.json.message.content.company_name }}\nLocation: {{ $('OpenAI').item.json.message.content.location }}\n\nHere is the candidates skill set:\n📄 SAMPLE RESUME\n\n\n%-------------------------\n% Resume in Latex (Adapted for Muhamed Adil)\n% Based on Jake Gutierrez template\n%------------------------\n\n\\documentclass[letterpaper,11pt]{article}\n\n\\usepackage{latexsym}\n\\usepackage[empty]{fullpage}\n\\usepackage{titlesec}\n\\usepackage{marvosym}\n\\usepackage[usenames,dvipsnames]{color}\n\\usepackage{verbatim}\n\\usepackage{enumitem}\n\\usepackage[hidelinks]{hyperref}\n\\usepackage{fancyhdr}\n\\usepackage[english]{babel}\n\\usepackage{tabularx}\n\\input{glyphtounicode}\n\n\\pagestyle{fancy}\n\\fancyhf{}\n\\fancyfoot{}\n\\renewcommand{\\headrulewidth}{0pt}\n\\renewcommand{\\footrulewidth}{0pt}\n\n\\addtolength{\\oddsidemargin}{-0.5in}\n\\addtolength{\\evensidemargin}{-0.5in}\n\\addtolength{\\textwidth}{1in}\n\\addtolength{\\topmargin}{-.5in}\n\\addtolength{\\textheight}{1.0in}\n\n\\urlstyle{same}\n\\raggedbottom\n\\raggedright\n\\setlength{\\tabcolsep}{0in}\n\\pdfgentounicode=1\n\n\\titleformat{\\section}{\n  \\vspace{-4pt}\\scshape\\raggedright\\large\n}{}{0em}{}[\\color{black}\\titlerule \\vspace{-5pt}]\n\n\\newcommand{\\resumeItem}[1]{\n  \\item\\small{\n    {#1 \\vspace{-2pt}}\n  }\n}\n\n\\newcommand{\\resumeSubheading}[4]{\n  \\vspace{-2pt}\\item\n    \\begin{tabular*}{0.97\\textwidth}[t]{l@{\\extracolsep{\\fill}}r}\n      \\textbf{#1} & #2 \\\\\n      \\textit{\\small#3} & \\textit{\\small #4} \\\\\n    \\end{tabular*}\\vspace{-7pt}\n}\n\n\\newcommand{\\resumeProjectHeading}[2]{\n    \\item\n    \\begin{tabular*}{0.97\\textwidth}{l@{\\extracolsep{\\fill}}r}\n      \\small#1 & #2 \\\\\n    \\end{tabular*}\\vspace{-7pt}\n}\n\n\\newcommand{\\resumeSubHeadingListStart}{\\begin{itemize}[leftmargin=0.15in, label={}]}\n\\newcommand{\\resumeSubHeadingListEnd}{\\end{itemize}}\n\\newcommand{\\resumeItemListStart}{\\begin{itemize}}\n\\newcommand{\\resumeItemListEnd}{\\end{itemize}\\vspace{-5pt}}\n\n%-------------------------------------------\n%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%\n\n\\begin{document}\n\n%----------HEADING----------\n\\begin{center}\n    \\textbf{\\Huge \\scshape Muhamed Adil Edavana Valappil} \\\\ \\vspace{1pt}\n    \\small +971 50 1386916 $|$ \\href{mailto:muhamedadil03@gmail.com}{\\underline{muhamedadil03@gmail.com}} $|$ \n    \\href{https://linkedin.com/in/muhamedadil}{\\underline{linkedin.com/in/muhamedadil}} $|$\n    \\href{https://muhamedadil.com}{\\underline{muhamedadil.com}} $|$\n    \\href{https://github.com/adilzubair}{\\underline{github.com/adilzubair}}\n\\end{center}\n\n\n%-----------EDUCATION-----------\n\\section{Education}\n  \\resumeSubHeadingListStart\n    \\resumeSubheading\n      {Saintgits College of Engineering}{2021 -- 2025}\n      {Bachelor of Technology, Computer Science and Engineering}{Kerala, India}\n  \\resumeSubHeadingListEnd\n\n%-----------EXPERIENCE-----------\n\\section{Experience}\n  \\resumeSubHeadingListStart\n\n    \\resumeSubheading\n      {Full Stack Developer}{Jan 2025 -- Present}\n      {Cooee (Remote, Australia-based)}{}\n      \\resumeItemListStart\n        \\resumeItem{Designed and deployed an automated stakeholder alert system triggered on new customer registrations, supporting platform scalability toward a \\textbf{100K+ user base}.}\n        \\resumeItem{Resolved high-priority production bugs impacting performance for \\textbf{1,000+ users}, significantly improving application stability.}\n        \\resumeItem{Reduced post-registration email delivery time by \\textbf{90\\%} by optimizing the email automation pipeline.}\n        \\resumeItem{Developed and maintained scalable backend services in \\textbf{Golang} using \\textbf{REST APIs} and \\textbf{RabbitMQ}.}\n        \\resumeItem{Optimized \\textbf{PostgreSQL} queries and schema migrations, reducing database response times by 40\\%.}\n      \\resumeItemListEnd\n\n    \\resumeSubheading\n      {Industrial Trainee}{May 2024 -- July 2024}\n      {Intel Corporation}{Bangalore, India}\n      \\resumeItemListStart\n        \\resumeItem{Built and deployed \\textbf{FastAPI}-based microservices with REST endpoints for chatbot interactions on edge devices.}\n        \\resumeItem{Enhanced \\textbf{TinyLlama} model inference using \\textbf{OpenVINO\\textsuperscript{\\texttrademark}}, enabling low-latency AI responses.}\n        \\resumeItem{Automated CI/CD with \\textbf{GitHub Actions}, accelerating deployment cycles for ML microservices.}\n      \\resumeItemListEnd\n\n    \\resumeSubheading\n      {Data Analyst Intern}{Aug 2023 -- Sept 2023}\n      {Al Wafaa Group}{Dubai, UAE}\n      \\resumeItemListStart\n        \\resumeItem{Built an automated workflow to analyze \\textbf{3,000+} customer records, generating upselling and retention insights.}\n        \\resumeItem{Automated lead qualification and CRM workflows using \\textbf{Python}, reducing manual effort by 70\\%.}\n        \\resumeItem{Designed interactive dashboards using \\textbf{IBM Cognos} and \\textbf{Python} for real-time sales insights.}\n      \\resumeItemListEnd\n\n  \\resumeSubHeadingListEnd\n\n%-----------PROJECTS-----------\n\\section{Projects}\n  \\resumeSubHeadingListStart\n    \\resumeProjectHeading\n      {\\textbf{QuickEval – AI Answer Sheet Evaluator} \\href{https://github.com/adilzubair/QuickEval}{(GitHub)}}{}\n      \\resumeItemListStart\n        \\resumeItem{Built full-stack web app with \\textbf{React.js}, \\textbf{Node.js}, and \\textbf{MongoDB} to automate exam grading.}\n        \\resumeItem{Integrated \\textbf{OpenAI API} for scoring, feedback, and analytics reports with confidence metrics.}\n      \\resumeItemListEnd\n\n    \\resumeProjectHeading\n      {\\textbf{Crashchain – Digital Forensics Platform} \\href{https://github.com/Project-SCE/Crashchain}{(GitHub)}}{}\n      \\resumeItemListStart\n        \\resumeItem{Engineered microservices backend using \\textbf{REST APIs}, \\textbf{RabbitMQ}, and \\textbf{Docker Compose}.}\n        \\resumeItem{Leveraged \\textbf{IPFS blockchain} for secure and tamper-proof forensic data storage.}\n      \\resumeItemListEnd\n\n    \\resumeProjectHeading\n      {\\textbf{FoodBot – LLM-based WhatsApp Chatbot} \\href{https://github.com/adilzubair/Yukthi_hackathon}{(GitHub)}}{}\n      \\resumeItemListStart\n        \\resumeItem{Developed chatbot with \\textbf{FastAPI} and \\textbf{RabbitMQ}, processing food queries using LLMs.}\n        \\resumeItem{Implemented Docker-based fault-tolerant deployment.}\n      \\resumeItemListEnd\n\n    \\resumeProjectHeading\n      {\\textbf{World Economic Data Platform} \\href{https://github.com/adilzubair/IBM-Hack-Challenge}{(GitHub)}}{}\n      \\resumeItemListStart\n        \\resumeItem{Built centralized analytics dashboards using \\textbf{IBM Cognos} with synced REST APIs to track economic indicators.}\n      \\resumeItemListEnd\n\n    \\resumeProjectHeading\n      {\\textbf{LedgerTrue – Anomaly Detection Dashboard} \\href{https://github.com/adilzubair/Ledger-True}{(GitHub)}}{}\n      \\resumeItemListStart\n        \\resumeItem{Developed \\textbf{FastAPI} backend and \\textbf{React.js} frontend to detect anomalies in uploaded Excel datasets.}\n        \\resumeItem{Implemented load balancing and visual dashboards for insights.}\n      \\resumeItemListEnd\n  \\resumeSubHeadingListEnd\n\n%-----------SKILLS-----------\n\\section{Technical Skills}\n \\begin{itemize}[leftmargin=0.15in, label={}]\n    \\small{\\item{\n     \\textbf{Languages}{: Go, Python, JavaScript, C, SQL} \\\\\n     \\textbf{Web Development}{: FastAPI, Node.js, React.js, Next.js, PostgreSQL, MongoDB, RabbitMQ, REST APIs} \\\\\n     \\textbf{Cloud}{: AWS (Elastic Beanstalk, CloudWatch, CodePipeline, WAF, Shield)} \\\\\n     \\textbf{DevOps}{: Docker Compose, Git, GitHub Actions, CI/CD, Linux CLI, Kafka, Pub/Sub}\n    }}\n \\end{itemize}\n\n%-----------ACHIEVEMENTS-----------\n\\section{Achievements}\n \\resumeSubHeadingListStart\n    \\resumeItem{Winner – Yukthi 2024 Hackathon (GPT automation bot)}\n    \\resumeItem{Runner-up – FrostCode Hackathon (chatbot development)}\n    \\resumeItem{Top 4 Finalist – EY CTF Challenge (Cybersecurity + ML)}\n    \\resumeItem{Research Internship – Fully funded at CCU Taiwan; published 2 review papers on ML and AI in HSI}\n \\resumeSubHeadingListEnd\n\n\\end{document}\n"
+            },
+            {
+              "content": "Please return JSON data structured the following way:\n{\n\"cover_letter\": \"\"\n}",
+              "role": "assistant"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        440,
+        600
+      ],
+      "id": "8f5497aa-3aa4-4d61-ae53-7af51c8f9d6d",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "d356CLk8P17AVpZM",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "OpenAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a08d6a7c-9b87-4337-bb16-e9e097ecbcbf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d78cf00cfded9e536c699c0a438b929c92eed9d4af339471306c087cdb7277e8"
+  },
+  "id": "4AiaWb5z9bNInL4X",
+  "tags": []
+}
